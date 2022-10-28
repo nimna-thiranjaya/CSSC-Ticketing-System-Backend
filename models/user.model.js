@@ -65,6 +65,10 @@ const userSchema = new mongoose.Schema(
       default: "Active",
       required: true,
     },
+    busID: {
+      type: String,
+      trim: true,
+    },
     tokens: [{ type: Object }],
   },
   {

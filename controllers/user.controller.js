@@ -19,6 +19,7 @@ const UserRegister = async (req, res) => {
       userExpDate,
       route,
       role,
+      busID,
     } = req.body;
     const user = await User.findOne({ email: email });
 
@@ -155,6 +156,7 @@ const UserRegister = async (req, res) => {
           nic: nic,
           password: hashedPassword,
           route: route,
+          busID: busID,
           role: role,
         };
         const newInspector = await User.create(data);
@@ -241,6 +243,174 @@ const UserLogin = async (req, res) => {
   }
 };
 
-const UserLogout = async (req, res) => {};
-const UserProfile = async (req, res) => {};
-module.exports = { UserRegister, UserLogin, UserProfile, UserLogout };
+//User Logout Function
+const UserLogout = async (req, res) => {
+  try {
+    req.logedUser.tokens = req.logedUser.tokens.filter((token) => {
+      return token.token !== req.token;
+    });
+    await req.logedUser.save();
+
+    return res.status(200).send({
+      success: true,
+      message: "User Logout Successful",
+    });
+  } catch (err) {
+    return res.status(500).send({ status: false, message: err.message });
+  }
+};
+
+//User Profile detais get using token
+const UserProfile = async (req, res) => {
+  try {
+    const logedUser = req.logedUser;
+
+    return res.status(200).send({ status: true, user: logedUser });
+  } catch (err) {
+    return res.status(500).send({ status: false, message: err.message });
+  }
+};
+
+const GetOneUser = async (req, res) => {
+  try {
+    const userId = req.params.id;
+
+    const userDetails = await User.findById(userId);
+
+    if (userDetails) {
+      return res.status(200).send({ status: true, user: userDetails });
+    } else {
+      return res.status(400).send({ status: false, message: "User not found" });
+    }
+  } catch (err) {
+    return res.status(500).send({ status: false, message: err.message });
+  }
+};
+
+const UpdateUser = async (req, res) => {
+  try {
+    const userId = req.logedUser._id;
+    const { firstName, lastName, phoneNo, nic, passportNo, country, route } =
+      req.body;
+
+    const user = await User.findById(userId);
+
+    if (user) {
+      const data = {
+        firstName: firstName,
+        lastName: lastName,
+        fullName: firstName + " " + lastName,
+        phoneNo: phoneNo,
+        nic: nic,
+        passportNo: passportNo,
+        country: country,
+      };
+
+      const updatedUser = await User.findByIdAndUpdate(userId, data);
+
+      if (updatedUser) {
+        return res.status(200).send({
+          status: true,
+          message: "User updated successfully",
+        });
+      } else {
+        return res.status(400).send({
+          status: false,
+          message: "User update failed",
+        });
+      }
+    } else {
+      return res.status(400).send({ status: false, message: "User not found" });
+    }
+  } catch (err) {
+    return res.status(500).send({ status: false, message: err.message });
+  }
+};
+
+const DeleteUserProfile = async (req, res) => {
+  try {
+    const userId = req.logedUser._id;
+
+    const deletedUser = await User.findByIdAndDelete(userId);
+
+    if (deletedUser) {
+      return res.status(200).send({
+        status: true,
+        message: "User deleted successfully",
+      });
+    } else {
+      return res.status(400).send({
+        status: false,
+        message: "User delete failed",
+      });
+    }
+  } catch (err) {
+    return res.status(500).send({ status: false, message: err.message });
+  }
+};
+
+const GetAllPassengers = async (req, res) => {
+  try {
+    const allPassengers = await User.find({
+      $or: [{ role: "LocalPassenger" }, { role: "ForeignPassenger" }],
+    });
+
+    if (allPassengers) {
+      return res.status(200).send({ status: true, users: allPassengers });
+    } else {
+      return res.status(400).send({ status: false, message: "No users found" });
+    }
+  } catch (err) {
+    return res.status(500).send({ status: false, message: err.message });
+  }
+};
+
+const GetAllInspector = async (req, res) => {
+  try {
+    const allInspectors = await User.find({ role: "Inspector" });
+
+    if (allInspectors) {
+      return res.status(200).send({ status: true, users: allInspectors });
+    } else {
+      return res
+        .status(400)
+        .send({ status: false, message: "No inspector found" });
+    }
+  } catch (err) {
+    return res.status(500).send({ status: false, message: err.message });
+  }
+};
+
+const DeleteUserById = async (req, res) => {
+  try {
+    const userId = req.params.id;
+
+    const deletedUser = await User.findByIdAndDelete(userId);
+
+    if (deletedUser) {
+      return res.status(200).send({
+        status: true,
+        message: "User deleted successfully",
+      });
+    } else {
+      return res.status(400).send({
+        status: false,
+        message: "User delete failed",
+      });
+    }
+  } catch (err) {
+    return res.status(500).send({ status: false, message: err.message });
+  }
+};
+module.exports = {
+  UserRegister,
+  UserLogin,
+  UserProfile,
+  UserLogout,
+  GetOneUser,
+  UpdateUser,
+  DeleteUserProfile,
+  GetAllPassengers,
+  GetAllInspector,
+  DeleteUserById,
+};
