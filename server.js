@@ -18,6 +18,14 @@ app.use("/api/user/", UserRouter);
 app.use("/api/helper/", HelperRouter);
 app.use("/api/bus/", BusRouter);
 
+app.get("/", (req, res) => {
+  try {
+    return res.redirect("https://backend-server.netlify.app/");
+  } catch (err) {
+    return res.status(500).send({ status: false, message: err.message });
+  }
+});
+
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Server is up and running on PORT : ${PORT}`);

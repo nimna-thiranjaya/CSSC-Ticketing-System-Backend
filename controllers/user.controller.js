@@ -59,13 +59,17 @@ const UserRegister = async (req, res) => {
           role: role,
         };
         const newLocalPassenger = await User.create(data);
-        if (newLocalPassenger) {
-          let data = {
-            userID: newLocalPassenger._id,
-          };
-          let stringData = JSON.stringify(data);
 
-          QRCode.toDataURL(stringData, function (err, GenaratedQR) {
+        if (newLocalPassenger) {
+          const encryptedUserID = jwt.sign(
+            { userID: newLocalPassenger._id },
+            process.env.JWT_SECRET_QR
+          );
+
+          //console.log(encryptedUserID);
+          //Slet stringData = JSON.stringify(data);
+
+          QRCode.toDataURL(encryptedUserID, function (err, GenaratedQR) {
             if (err) {
               console.log("error occurred in QR code generation");
             } else {
@@ -75,6 +79,7 @@ const UserRegister = async (req, res) => {
                 { new: true },
                 (err, updatedUser) => {
                   if (err) {
+                    User.findByIdAndDelete(newLocalPassenger._id);
                     res.status(400).send({
                       status: false,
                       message: "Local Passenger registration failed",
@@ -111,12 +116,13 @@ const UserRegister = async (req, res) => {
         };
         const newForeignPassenger = await User.create(data);
         if (newForeignPassenger) {
-          let data = {
-            userID: newForeignPassenger._id,
-          };
-          let stringData = JSON.stringify(data);
+          const encryptedUserID = jwt.sign(
+            { userID: newForeignPassenger._id },
+            process.env.JWT_SECRET_QR
+          );
+          //let stringData = JSON.stringify(data);
 
-          QRCode.toDataURL(stringData, function (err, GenaratedQR) {
+          QRCode.toDataURL(encryptedUserID, function (err, GenaratedQR) {
             if (err) {
               console.log("error occurred in QR code generation");
             } else {
