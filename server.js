@@ -8,6 +8,7 @@ const { connectDB } = require("./utils/connection");
 const UserRouter = require("./routes/user.routes");
 const HelperRouter = require("./routes/helper.routes");
 const BusRouter = require("./routes/bus.routes");
+const InspectorRouter = require("./routes/inspector.routes");
 
 app.use(express.json());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -17,10 +18,11 @@ app.use(cors());
 app.use("/api/user/", UserRouter);
 app.use("/api/helper/", HelperRouter);
 app.use("/api/bus/", BusRouter);
+app.use("/api/inspector/", InspectorRouter);
 
 app.get("/", (req, res) => {
   try {
-    return res.redirect("https://backend-server.netlify.app/");
+    return res.status(200).send({ status: true, message: "Server is running" });
   } catch (err) {
     return res.status(500).send({ status: false, message: err.message });
   }

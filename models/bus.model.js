@@ -29,6 +29,10 @@ const busSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    busState: {
+      type: String,
+      default: "Stopped",
+    },
   },
   {
     timestamps: true,

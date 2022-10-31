@@ -132,6 +132,7 @@ const UserRegister = async (req, res) => {
                 { new: true },
                 (err, updatedUser) => {
                   if (err) {
+                    User.findByIdAndDelete(newForeignPassenger._id);
                     res.status(400).send({
                       status: false,
                       message: "Foreign Passenger registration failed",
